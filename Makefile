@@ -4,7 +4,7 @@ ROOTGLIBS  = $(shell root-config --glibs)
 CXXFLAGS  += $(ROOTCFLAGS)
 LIBS       = $(ROOTLIBS) -lASImage
 GLIBS      = $(ROOTGLIBS)
-GXX	   = g++ -Wall -O3
+GXX	   = g++ -Wall -O3 -pthread
 
 default: all
 
