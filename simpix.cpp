@@ -14,6 +14,45 @@
 #include <iostream>
 #include <stdio.h>
 using namespace std;
+int WEIGHTS[3]={1,1,1}; // weights for pixel difference
+
+// calculate apparent difference between two pixels
+double PixDiff(const UInt_t p1, const UInt_t p2) {
+  // R byte is byte 2, G is byte 1, B is byte 0
+  double diffsqr = 0.;
+  // reverse loop so red is calculated first
+  double ravg=0.;
+  for (int i=2; i>=0; i--) {
+    int c1 = (p1 >> i*8) & 0xFF;
+    int c2 = (p2 >> i*8) & 0xFF;
+    double d = c2-c1;
+
+    // sum difference in colors using Redmean approx
+    if (i==0) {
+      // Blue
+      diffsqr+=(2.+(255.-ravg)/256)*d*d;
+    } else if (i==1) {
+      // Green
+      diffsqr+=4.*d*d;
+    } else {
+      // Red
+      ravg = (c2+c1)/2.;
+      diffsqr += (2.+ravg/256)*d*d;
+    }
+    // cout << hex << p1<< " " << c1<<endl;
+  }
+  // cout << "Pixel Diff: " << diffsqr << endl;
+  return diffsqr;
+}
+
+// calculate total difference in pixel colors between two pixel arrays
+double CalcTotalDiff(int npix, const UInt_t *parr1, const UInt_t *parr2) {
+  double total_diff = 0.;
+  for (int i=0; i<npix; i++) {
+    total_diff += PixDiff(parr1[i], parr2[i]);
+  }
+  return total_diff;
+}
 
 int main(int argc, char **argv){
 
@@ -44,21 +83,24 @@ int main(int argc, char **argv){
   // access the pixels for the output image 
   // each pixel is a 32-bit word, 1 byte each for (alpha,red,green,blue)
   // don't touch alpha (bits 31:28)
-  UInt_t *outPix = out->GetArgbArray();  
+  UInt_t *outPix = out->GetArgbArray();
+  const UInt_t *tgtPix = tgt->GetArgbArray();  
 
   // examples of pixel manipulations 
-  for (int i=0;i< numPix; i++){
-    //  outPix[i]&=0xff00ffff;  // turn off red
-    // outPix[i]&=0xffff00ff;  // turn off green
-     outPix[i]&=0xffffff00;  // turn off blue
-    //  cout << hex << outPix[i]<<endl;  // print pixel values in hex
-  }
+  // for (int i=0;i< numPix; i++){
+  //   //  outPix[i]&=0xff00ffff;  // turn off red
+  //   // outPix[i]&=0xffff00ff;  // turn off green
+  //   //  outPix[i]&=0xffffff00;  // turn off blue
+  //   //  cout << hex << outPix[i]<<endl;  // print pixel values in hex
+  // }
   // flip the image
-  for (int i=0;i< numPix/2; i++){
-    unsigned pxl=outPix[i];
-    outPix[i]=outPix[numPix-i-1];
-    outPix[numPix-i-1]=pxl;
-  }
+  // for (int i=0;i< numPix/2; i++){
+  //   unsigned pxl=outPix[i];
+  //   outPix[i]=outPix[numPix-i-1];
+  //   outPix[numPix-i-1]=pxl;
+  // }
+  double diff1 = CalcTotalDiff(numPix, outPix, tgtPix);
+  cout<<"Initial Diff: "<<diff1<<endl;
 
   // *************************
 
@@ -77,7 +119,7 @@ int main(int argc, char **argv){
   c1->Print("collage.png");
   
   // save the new image
-  out->WriteImage(fout.Data());
+  // out->WriteImage(fout.Data());
 
   // coment out the lines for running in batch mode
   cout << "Press ^c to exit" << endl;
