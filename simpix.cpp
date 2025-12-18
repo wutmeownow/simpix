@@ -241,8 +241,9 @@ int main(int argc, char **argv){
   TASImage *out2 = new TASImage(*tgt); // start with copy of tgt
 
   // Test image geometry, exit if they are not the same dimensions
+  cout << "SRC Pixel Geometry: " << src->GetWidth() << " x " << src->GetHeight() << endl;
+  cout << "TGT Pixel Geometry: " << tgt->GetWidth() << " x " << tgt->GetHeight() << endl;
   assert ( src->GetWidth() == tgt->GetWidth() && src->GetHeight() == tgt->GetHeight() );
-  cout << "Pixel Geometry: " << src->GetWidth() << " x " << src->GetHeight() << endl;
   Long_t numPix=src->GetWidth()*src->GetHeight();
 
   // *** The work happens here
