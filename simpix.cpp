@@ -300,7 +300,8 @@ int main(int argc, char **argv){
   out->Draw("X");
   c1->cd(4);
   out2->Draw("X");
-  c1->Print(fout);
+  c1->Print(fout); 
+  // save as png first, then convert to pdf externally later
 
   // Clean up
   delete r1;
